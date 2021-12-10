@@ -3,12 +3,26 @@ version: "3"
 services:
 
   jupyter:
-    #build:
-    #  context: ./jupyter
-    image: jupyter/all-spark-notebook
+    build:
+      context: ./jupyter
+      args:
+        - spark_version=3.0.0
+        - hadoop_version=3.2
+        - spark_checksum=BFE45406C67CC4AE00411AD18CC438F51E7D4B6F14EB61E7BF6B5450897C2E8D3AB020152657C0239F253735C263512FFABF538AC5B9FFFA38B8295736A9C387
+        - openjdk_version=8  
+    #image: jupyter/all-spark-notebook
     container_name: jupyter
     ports:
       - ${JUPYTER_PORT}:8888 #default 8888
+      - 10200:10200 # Module REST Port
+      - 4041:4040 # Web UI (Spark)
+      - 7001:7001 # Driver Port (Spark)
+      - 15001:15001 # Broadcast (Spark)
+      - 15002:15002 # File Server (Spark)
+      - 15003:15003 # Blockmanager (Spark)
+      - 7337:7337 # Shuffle? (Spark)
+
+
     #environment:
       #- NB_UID=1002 #change to host user id in case it's not 1000
       #- POSTGRES_DB=$POSTGRES_DB
@@ -44,7 +58,6 @@ services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
-    restart: always
     ports:
       - 9870:9870
       - 9010:9000
@@ -59,7 +72,6 @@ services:
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
-    restart: always
     volumes:
       - hadoop_datanode:/hadoop/dfs/data
     environment:
@@ -73,7 +85,6 @@ services:
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: resourcemanager
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
     env_file:
@@ -82,7 +93,6 @@ services:
   nodemanager1:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
@@ -91,7 +101,6 @@ services:
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
     container_name: historyserver
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     volumes:
@@ -122,6 +131,14 @@ services:
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+
+  spark-worker-2:
+    image: bde2020/spark-worker:3.1.1-hadoop3.2
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
 
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore

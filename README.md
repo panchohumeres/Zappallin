@@ -1,5 +1,7 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
 
+![Stack Architecture](Zapallin.png)
+
 # Docker multi-container environment with Hadoop, Spark and Hive
 
 This is it: a Docker multi-container environment with Hadoop (HDFS), Spark and Hive. But without the large memory requirements of a Cloudera sandbox. (On my Windows 10 laptop (with WSL2) it seems to consume a mere 3 GB.)
@@ -259,3 +261,37 @@ The available configurations are:
 * /etc/hadoop/mapred-site.xml  MAPRED_CONF
 
 If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
+
+## TROUBLESHOOTING:
+* **Jupyter Notebooks**:
+   - `Permission denied: <filename>` when creating files or folders on Jupyter Notebook endpoint:
+      * **Cause**: Permission problems with mounted volumes. Jupyter container has by default a "jovyan" user, which Linux id is 1000. The container will only recognize as "writable" files and folders that in **the host** belong to the same Linux id==1000 (independent of the name of user and group).
+      * **Diagnostic**:
+         1. `docker-compose exec jupyter bash`.
+         2. `id`------>This will list the jovyan user properties, including its Linux ID.
+         3. `cd` into any of the mounted folders, then `ls -all`, check the folders and files owners and groups, if they do not belong to UID==1000, then there will be trouble.
+         4. `exit` and `cd` into any of the mounted folders in the **host**, check who really owns the folders or files.
+      * **Solution**, either:
+         - **Copy permissions from a folder that works**
+            * `sudo chmod -R --reference=<source_folder> <target_folder>`
+            * `sudo chown -R --reference=<source_folder> <target_folder>`
+         - **Change the owner of the folders to UID==1000**
+            * `sudo chmod -R g+rwx <target_folder>`
+            * `sudo chgrp -R 1000 <target_folder>`
+            * `sudo chown -R 1000 <target_folder>`
+      * **References**:
+         - https://github.com/jupyter/docker-stacks/issues/114
+         - https://discourse.jupyter.org/t/what-is-with-the-weird-jovyan-user/1673
+* **SSL Certificates**:
+   - When ./certbot.sh cannot create certificates for endpoints, it might be due to filesystem permissions problems.
+      * **Diagnostic**:
+         1. cd into either `certbot` or `certificates` folders in `data` folder.
+         2. Check permissions in folders : `ls -all`
+         3. See if there are different patterns compared to other folders.
+      * **Solution**, either:
+         - **Copy permissions from a folder that works**
+            * See jupyter solution
+         - **Change the owner of the folders to UID==1000**
+            * See jupyter solution.
+
+* If Kibana container fails to start, due to Elasticsearch not ready yet (**"GREEN"** status in logs if it is ready), simply: `docker-compose up kibana` after cluster is ready.
