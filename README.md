@@ -1,7 +1,6 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
 
 # Zapallin  <img src="zapallin_logo.png" alt="alt text" width="302px" height="100px">
-<a href='https://www.shutterstock.com/es/license' style="font-size:5px">Original logo from shutterstock.com (Ksenya Savva)</a>
 
 ## Docker multi-container environment with Hadoop, Spark, Hive and Jupyter Notebooks, with PySpark and Scala support.
 ### Intended to be a lighter alternative to Apache Zeppelin
