@@ -10,7 +10,6 @@ services:
         - hadoop_version=3.2
         - spark_checksum=BFE45406C67CC4AE00411AD18CC438F51E7D4B6F14EB61E7BF6B5450897C2E8D3AB020152657C0239F253735C263512FFABF538AC5B9FFFA38B8295736A9C387
         - openjdk_version=8  
-    #image: jupyter/all-spark-notebook
     container_name: jupyter
     ports:
       - ${JUPYTER_PORT}:8888 #default 8888
@@ -23,33 +22,21 @@ services:
       - 7337:7337 # Shuffle? (Spark)
 
 
-    #environment:
-      #- NB_UID=1002 #change to host user id in case it's not 1000
-      #- POSTGRES_DB=$POSTGRES_DB
-      #- DB_NAME=$DB_NAME
-     # - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-     # - POSTGRES_PORT=${POSTGRES_PORT}
-     # - POSTGRES_USER=$POSTGRES_USER
-     # - PASSWORD=$JUPYTER_PSSWD
-     # - JUPYTER_ALLOW_ORIGIN=$JUPYTER_ALLOW_ORIGIN
-      #- S3_ACCESS_KEY=$S3_ACCESS_KEY
-      #- S3_SECRET_KEY=$S3_SECRET_KEY
-      #- S3_BUCKET=$S3_BUCKET
-      #- MAPBOX_API_KEY=$MAPBOX_API_KEY
-      #- MAPBOX_API_UPLOAD_KEY=$MAPBOX_API_UPLOAD_KEY
-      #- PLOTLY_USER=$PLOTLY_USER
-      #- PLOTLY_API_KEY=$PLOTLY_API_KEY
+    environment:
+      - NB_UID=1002 #change to host user id in case it's not 1000
+      - JUPYTER_ALLOW_ORIGIN=$JUPYTER_ALLOW_ORIGIN
+      - PASSWORD=$JUPYTER_PSSWD
 
     #command: /bin/sh -c "/home/jovyan/.jupyter/jupyter-docker-entrypoint.sh"
     volumes:
       - ${PWD}/notebooks:/home/jovyan/work
-      #- ${HOST_DATA_PATH}:/data
+      - ${HOST_DATA_PATH}:/data
       - ${HOST_DATA_PATH}/ETLcache:/home/jovyan/work/ETLcache
       - ${PWD}/jupyter:/home/jovyan/.jupyter/
       - ${PWD}/backup_utils:/home/jovyan/work/backup
       - ${PWD}/ETL:/home/jovyan/work/ETL
       - ${PWD}/ETLdocs:/home/jovyan/work/ETLdocs
-      #- ${PWD}/CRONTAB:/home/jovyan/work/CRONTAB
+      - ${PWD}/CRONTAB:/home/jovyan/work/CRONTAB
       - ${PWD}/modules:/home/jovyan/work/modules
       - ${PWD}/args:/home/jovyan/work/args
 
@@ -62,7 +49,7 @@ services:
       - 9870:9870
       - 9010:9000
     volumes:
-      - hadoop_namenode:/hadoop/dfs/name
+      - ${HOST_DATA_PATH}/hadoop_namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
@@ -73,7 +60,7 @@ services:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
+      - ${HOST_DATA_PATH}/hadoop_datanode:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
       CORE_CONF_fs_defaultFS: hdfs://namenode:9000
@@ -104,7 +91,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
+      - ${HOST_DATA_PATH}/hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
       - ./hadoop.env
 
@@ -174,9 +161,3 @@ services:
     container_name: presto-coordinator
     ports:
       - "8089:8089"
-
-volumes:
-  hadoop_namenode:
-  hadoop_datanode:
-  hadoop_historyserver:
-

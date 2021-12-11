@@ -71,3 +71,4 @@ RUN mamba install --quiet --yes \
     fix-permissions "/home/${NB_USER}"
 
 WORKDIR "${HOME}"
+VOLUME /home/jovyan/work
