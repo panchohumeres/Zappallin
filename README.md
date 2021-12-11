@@ -1,11 +1,13 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
 
-![Stack Architecture](Zapallin.png)
+# Zapallin  <img src="zapallin_logo.png" alt="alt text" width="302px" height="100px">
+<a href='https://www.freepik.com/vectors/logo' style="font-size:5px">Original logo vector created by sentavio - www.freepik.com</a>
 
-# Docker multi-container environment with Hadoop, Spark and Hive
-# Docker multi-container environment with Hadoop, Spark, Hive and Jupyter Notebooks, with PySpark and Scala support.
+## Docker multi-container environment with Hadoop, Spark, Hive and Jupyter Notebooks, with PySpark and Scala support.
 ### Intended to be a lighter alternative to Apache Zeppelin
 ### Forked from: https://github.com/Marcel-Jan/docker-hadoop-spark
+
+![Stack Architecture](Zapallin.png)
 
 This is it: a Docker multi-container environment with Hadoop (HDFS), Spark and Hive. But without the large memory requirements of a Cloudera sandbox. (On a Windows 10 laptop (with WSL2) it seems to consume a mere 3 GB.)
 It includes a Jupyter Notebook container, with PySpark 3.0, Open JDK 4.0 and Scala Kernel (from Jupyter official docker stacks), which allows communication with Spark cluster through Jupyter's interactive IDE. It's like a light alternative of Apache Zeppelin!
